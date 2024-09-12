@@ -89,23 +89,22 @@ def upload_files():
     if not files or files[0].filename == '':
         return "No selected files"
 
+    results = []
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-    results = []
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.lower().endswith('.pdf'):
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            # Extract text from PDF
-            text = extract_text_from_pdf(file_path)
-
-            # Process the extracted text
-            result = process_notes(text)
-            results.append({"filename": filename, "result": result})
+            if filename.lower().endswith('.pdf'):
+                # Extract text from PDF
+                text = extract_text_from_pdf(file_path)
+                # Process the extracted text
+                result = process_notes(text)
+                results.append({"filename": filename, "result": result})
+            elif filename.lower().endswith('.pptx'):
+                # TODO: Implement PPTX processing if needed
+                pass
 
     # Convert Markdown to HTML for all results
     for result in results:
@@ -153,7 +152,6 @@ def upload_files():
     </html>
     '''
     return render_template_string(html_content, results=results)
-
 
 
 @app.route('/cross_question', methods=['POST'])
